@@ -42,15 +42,9 @@ Kedua-dua pilihan memasang perkara yang sama. Selepas pemasangan, tetingkap CMD 
 
 ## Kawalan Ruqyah
 
-Arahan **Play** memulakan bacaan sekarang. **Stop** menghentikan bacaan yang sedang berjalan tetapi tidak mematikan jadual automatik. **Matikan auto-play** pula menghentikan jadual log masuk dan 2:00 petang.
+Arahan di bawah hanya untuk menghentikan bacaan atau membuang aplikasi sepenuhnya.
 
 ### Windows — PowerShell
-
-**PLAY — main sekarang:**
-
-```powershell
-Start-Process powershell.exe -ArgumentList "-NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File `"$env:LOCALAPPDATA\Ruqyah\ruqyah.ps1`"" -WindowStyle Hidden
-```
 
 **STOP — hentikan bacaan yang sedang dimainkan:**
 
@@ -61,25 +55,7 @@ Where-Object { $_.CommandLine -like "*-File *$playerPath*" } |
 ForEach-Object { Stop-Process -Id $_.ProcessId -Force }
 ```
 
-**MATIKAN AUTO-PLAY:**
-
-```powershell
-Disable-ScheduledTask -TaskName "Ruqyah-Logon","Ruqyah-Daily-1400"
-```
-
-**HIDUPKAN AUTO-PLAY:**
-
-```powershell
-Enable-ScheduledTask -TaskName "Ruqyah-Logon","Ruqyah-Daily-1400"
-```
-
 ### Windows — CMD
-
-**PLAY:**
-
-```cmd
-start "" powershell -NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File "%LOCALAPPDATA%\Ruqyah\ruqyah.ps1"
-```
 
 **STOP:**
 
@@ -87,42 +63,12 @@ start "" powershell -NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File
 powershell -NoProfile -Command "$p=Join-Path $env:LOCALAPPDATA 'Ruqyah\ruqyah.ps1'; Get-CimInstance Win32_Process -Filter \"name='powershell.exe'\" | Where-Object { $_.CommandLine -like ('*-File *' + $p + '*') } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force }"
 ```
 
-**MATIKAN AUTO-PLAY:**
-
-```cmd
-powershell -NoProfile -Command "Disable-ScheduledTask -TaskName 'Ruqyah-Logon','Ruqyah-Daily-1400'"
-```
-
-**HIDUPKAN AUTO-PLAY:**
-
-```cmd
-powershell -NoProfile -Command "Enable-ScheduledTask -TaskName 'Ruqyah-Logon','Ruqyah-Daily-1400'"
-```
-
 ### macOS — Terminal
-
-**PLAY — main sekarang:**
-
-```bash
-launchctl kickstart -k "gui/$(id -u)/com.fahmie.ruqyah"
-```
 
 **STOP — hentikan bacaan yang sedang berjalan:**
 
 ```bash
 launchctl kill SIGTERM "gui/$(id -u)/com.fahmie.ruqyah"
-```
-
-**MATIKAN AUTO-PLAY dan hentikan LaunchAgent:**
-
-```bash
-launchctl bootout "gui/$(id -u)" "$HOME/Library/LaunchAgents/com.fahmie.ruqyah.plist"
-```
-
-**HIDUPKAN AUTO-PLAY semula:**
-
-```bash
-launchctl bootstrap "gui/$(id -u)" "$HOME/Library/LaunchAgents/com.fahmie.ruqyah.plist"
 ```
 
 ---
