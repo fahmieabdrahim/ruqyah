@@ -84,10 +84,18 @@ rm -rf "$HOME/.local/share/ruqyah"
 
 ### Windows
 
-Jalankan dalam PowerShell atau CMD:
+**Jika menggunakan PowerShell:**
+
+```powershell
+Unregister-ScheduledTask -TaskName "Ruqyah-Logon" -Confirm:$false -ErrorAction SilentlyContinue
+Unregister-ScheduledTask -TaskName "Ruqyah-Daily-1400" -Confirm:$false -ErrorAction SilentlyContinue
+Remove-Item "$env:LOCALAPPDATA\Ruqyah" -Recurse -Force
+```
+
+**Jika menggunakan CMD:**
 
 ```cmd
-powershell -NoProfile -Command "Unregister-ScheduledTask -TaskName 'Ruqyah-Logon' -Confirm:\$false -ErrorAction SilentlyContinue; Unregister-ScheduledTask -TaskName 'Ruqyah-Daily-1400' -Confirm:\$false -ErrorAction SilentlyContinue; Remove-Item '\$env:LOCALAPPDATA\Ruqyah' -Recurse -Force"
+powershell -NoProfile -Command "Unregister-ScheduledTask -TaskName 'Ruqyah-Logon' -Confirm:$false -ErrorAction SilentlyContinue; Unregister-ScheduledTask -TaskName 'Ruqyah-Daily-1400' -Confirm:$false -ErrorAction SilentlyContinue; Remove-Item (Join-Path $env:LOCALAPPDATA 'Ruqyah') -Recurse -Force"
 ```
 
 ## Nota penting
