@@ -20,13 +20,75 @@ curl -fsSL https://raw.githubusercontent.com/fahmieabdrahim/ruqyah/main/install.
 
 ## Pemasangan Windows 10/11
 
-Buka **Windows PowerShell** (bukan Command Prompt). Jalankan:
+**Pilihan A — PowerShell**
+
+Buka Windows PowerShell dan jalankan:
 
 ```powershell
 irm https://raw.githubusercontent.com/fahmieabdrahim/ruqyah/main/install.ps1 | iex
 ```
 
-Arahan ini mendaftarkan dua tugasan: ketika log masuk dan setiap hari pada 2:00 petang.
+**Pilihan B — Command Prompt (CMD)**
+
+Buka CMD dan jalankan arahan ini:
+
+```cmd
+powershell -NoProfile -ExecutionPolicy Bypass -Command "irm 'https://raw.githubusercontent.com/fahmieabdrahim/ruqyah/main/install.ps1' | iex"
+```
+
+Kedua-dua pilihan memasang perkara yang sama. Selepas pemasangan, tetingkap CMD atau PowerShell boleh ditutup. Pemain berjalan secara tersembunyi.
+
+## Cara mematikan auto-play
+
+Arahan ini menghentikan jadual automatik tetapi tidak membuang fail pemasangan.
+
+### macOS
+
+Buka Terminal:
+
+```bash
+launchctl bootout "gui/$(id -u)" "$HOME/Library/LaunchAgents/com.fahmie.ruqyah.plist"
+```
+
+Untuk aktifkan semula:
+
+```bash
+launchctl bootstrap "gui/$(id -u)" "$HOME/Library/LaunchAgents/com.fahmie.ruqyah.plist"
+```
+
+### Windows
+
+Buka PowerShell atau CMD (arahan ini boleh dijalankan dari kedua-duanya):
+
+**Matikan auto-play:**
+
+```cmd
+powershell -NoProfile -Command "Disable-ScheduledTask -TaskName 'Ruqyah-Logon','Ruqyah-Daily-1400'"
+```
+
+**Aktifkan semula auto-play:**
+
+```cmd
+powershell -NoProfile -Command "Enable-ScheduledTask -TaskName 'Ruqyah-Logon','Ruqyah-Daily-1400'"
+```
+
+## Nyahpasang sepenuhnya
+
+### macOS
+
+```bash
+launchctl bootout "gui/$(id -u)" "$HOME/Library/LaunchAgents/com.fahmie.ruqyah.plist" 2>/dev/null || true
+rm -f "$HOME/Library/LaunchAgents/com.fahmie.ruqyah.plist"
+rm -rf "$HOME/.local/share/ruqyah"
+```
+
+### Windows
+
+Jalankan dalam PowerShell atau CMD:
+
+```cmd
+powershell -NoProfile -Command "Unregister-ScheduledTask -TaskName 'Ruqyah-Logon' -Confirm:\$false -ErrorAction SilentlyContinue; Unregister-ScheduledTask -TaskName 'Ruqyah-Daily-1400' -Confirm:\$false -ErrorAction SilentlyContinue; Remove-Item '\$env:LOCALAPPDATA\Ruqyah' -Recurse -Force"
+```
 
 ## Nota penting
 - Komputer perlu hidup, tidak berada dalam Sleep, dan pengguna perlu log masuk pada waktu jadual untuk audio dimainkan.
@@ -36,21 +98,3 @@ Arahan ini mendaftarkan dua tugasan: ketika log masuk dan setiap hari pada 2:00 
 
 ## Sumber audio
 EveryAyah — Saad Al-Ghamdi, folder `Ghamadi_40kbps`. Sila semak syarat penggunaan dan atribusi sumber sebelum pengedaran semula.
-
-## Nyahpasang macOS
-
-```bash
-launchctl bootout "gui/$(id -u)" "$HOME/Library/LaunchAgents/com.fahmie.ruqyah.plist" 2>/dev/null || true
-rm -f "$HOME/Library/LaunchAgents/com.fahmie.ruqyah.plist"
-rm -rf "$HOME/.local/share/ruqyah"
-```
-
-## Nyahpasang Windows
-
-Jalankan dalam PowerShell:
-
-```powershell
-Unregister-ScheduledTask -TaskName "Ruqyah-Logon" -Confirm:$false -ErrorAction SilentlyContinue
-Unregister-ScheduledTask -TaskName "Ruqyah-Daily-1400" -Confirm:$false -ErrorAction SilentlyContinue
-Remove-Item "$env:LOCALAPPDATA\Ruqyah" -Recurse -Force
-```
