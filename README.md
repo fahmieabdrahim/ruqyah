@@ -55,8 +55,9 @@ Start-Process powershell.exe -ArgumentList "-NoProfile -WindowStyle Hidden -Exec
 **STOP — hentikan bacaan yang sedang dimainkan:**
 
 ```powershell
+$playerPath = Join-Path $env:LOCALAPPDATA "Ruqyah\ruqyah.ps1"
 Get-CimInstance Win32_Process -Filter "name='powershell.exe'" |
-Where-Object { $_.CommandLine -like '*Ruqyah\ruqyah.ps1*' } |
+Where-Object { $_.CommandLine -like "*-File *$playerPath*" } |
 ForEach-Object { Stop-Process -Id $_.ProcessId -Force }
 ```
 
@@ -83,7 +84,7 @@ start "" powershell -NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File
 **STOP:**
 
 ```cmd
-powershell -NoProfile -Command "Get-CimInstance Win32_Process -Filter \"name='powershell.exe'\" | Where-Object { $_.CommandLine -like '*Ruqyah\ruqyah.ps1*' } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force }"
+powershell -NoProfile -Command "$p=Join-Path $env:LOCALAPPDATA 'Ruqyah\ruqyah.ps1'; Get-CimInstance Win32_Process -Filter \"name='powershell.exe'\" | Where-Object { $_.CommandLine -like ('*-File *' + $p + '*') } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force }"
 ```
 
 **MATIKAN AUTO-PLAY:**
