@@ -30,7 +30,7 @@ irm https://raw.githubusercontent.com/fahmieabdrahim/ruqyah/main/install.ps1 | i
 
 **Pilihan B — Command Prompt (CMD)**
 
-Buka CMD dan jalankan arahan ini:
+Buka CMD dan jalankan:
 
 ```cmd
 powershell -NoProfile -ExecutionPolicy Bypass -Command "irm 'https://raw.githubusercontent.com/fahmieabdrahim/ruqyah/main/install.ps1' | iex"
@@ -38,43 +38,101 @@ powershell -NoProfile -ExecutionPolicy Bypass -Command "irm 'https://raw.githubu
 
 Kedua-dua pilihan memasang perkara yang sama. Selepas pemasangan, tetingkap CMD atau PowerShell boleh ditutup. Pemain berjalan secara tersembunyi.
 
-## Cara mematikan auto-play
+---
 
-Arahan ini menghentikan jadual automatik tetapi tidak membuang fail pemasangan.
+## Kawalan Ruqyah
 
-### macOS
+Arahan **Play** memulakan bacaan sekarang. **Stop** menghentikan bacaan yang sedang berjalan tetapi tidak mematikan jadual automatik. **Matikan auto-play** pula menghentikan jadual log masuk dan 2:00 petang.
 
-Buka Terminal:
+### Windows — PowerShell
 
-```bash
-launchctl bootout "gui/$(id -u)" "$HOME/Library/LaunchAgents/com.fahmie.ruqyah.plist"
+**PLAY — main sekarang:**
+
+```powershell
+Start-Process powershell.exe -ArgumentList "-NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File `"$env:LOCALAPPDATA\Ruqyah\ruqyah.ps1`"" -WindowStyle Hidden
 ```
 
-Untuk aktifkan semula:
+**STOP — hentikan bacaan yang sedang dimainkan:**
 
-```bash
-launchctl bootstrap "gui/$(id -u)" "$HOME/Library/LaunchAgents/com.fahmie.ruqyah.plist"
+```powershell
+Get-CimInstance Win32_Process -Filter "name='powershell.exe'" |
+Where-Object { $_.CommandLine -like '*Ruqyah\ruqyah.ps1*' } |
+ForEach-Object { Stop-Process -Id $_.ProcessId -Force }
 ```
 
-### Windows
+**MATIKAN AUTO-PLAY:**
 
-Buka PowerShell atau CMD (arahan ini boleh dijalankan dari kedua-duanya):
+```powershell
+Disable-ScheduledTask -TaskName "Ruqyah-Logon","Ruqyah-Daily-1400"
+```
 
-**Matikan auto-play:**
+**HIDUPKAN AUTO-PLAY:**
+
+```powershell
+Enable-ScheduledTask -TaskName "Ruqyah-Logon","Ruqyah-Daily-1400"
+```
+
+### Windows — CMD
+
+**PLAY:**
+
+```cmd
+start "" powershell -NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File "%LOCALAPPDATA%\Ruqyah\ruqyah.ps1"
+```
+
+**STOP:**
+
+```cmd
+powershell -NoProfile -Command "Get-CimInstance Win32_Process -Filter \"name='powershell.exe'\" | Where-Object { $_.CommandLine -like '*Ruqyah\ruqyah.ps1*' } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force }"
+```
+
+**MATIKAN AUTO-PLAY:**
 
 ```cmd
 powershell -NoProfile -Command "Disable-ScheduledTask -TaskName 'Ruqyah-Logon','Ruqyah-Daily-1400'"
 ```
 
-**Aktifkan semula auto-play:**
+**HIDUPKAN AUTO-PLAY:**
 
 ```cmd
 powershell -NoProfile -Command "Enable-ScheduledTask -TaskName 'Ruqyah-Logon','Ruqyah-Daily-1400'"
 ```
 
-## Nyahpasang sepenuhnya
+### macOS — Terminal
+
+**PLAY — main sekarang:**
+
+```bash
+launchctl kickstart -k "gui/$(id -u)/com.fahmie.ruqyah"
+```
+
+**STOP — hentikan bacaan yang sedang berjalan:**
+
+```bash
+launchctl kill SIGTERM "gui/$(id -u)/com.fahmie.ruqyah"
+```
+
+**MATIKAN AUTO-PLAY dan hentikan LaunchAgent:**
+
+```bash
+launchctl bootout "gui/$(id -u)" "$HOME/Library/LaunchAgents/com.fahmie.ruqyah.plist"
+```
+
+**HIDUPKAN AUTO-PLAY semula:**
+
+```bash
+launchctl bootstrap "gui/$(id -u)" "$HOME/Library/LaunchAgents/com.fahmie.ruqyah.plist"
+```
+
+---
+
+## Nyahpasang semua (Uninstall All)
+
+Arahan ini menghentikan pemain, membuang jadual automatik dan memadam fail aplikasi.
 
 ### macOS
+
+Buka Terminal:
 
 ```bash
 launchctl bootout "gui/$(id -u)" "$HOME/Library/LaunchAgents/com.fahmie.ruqyah.plist" 2>/dev/null || true
@@ -82,20 +140,26 @@ rm -f "$HOME/Library/LaunchAgents/com.fahmie.ruqyah.plist"
 rm -rf "$HOME/.local/share/ruqyah"
 ```
 
-### Windows
+### Windows — PowerShell
 
-**Jika menggunakan PowerShell:**
+Buka PowerShell:
 
 ```powershell
+Get-CimInstance Win32_Process -Filter "name='powershell.exe'" |
+Where-Object { $_.CommandLine -like '*Ruqyah\ruqyah.ps1*' } |
+ForEach-Object { Stop-Process -Id $_.ProcessId -Force }
+
 Unregister-ScheduledTask -TaskName "Ruqyah-Logon" -Confirm:$false -ErrorAction SilentlyContinue
 Unregister-ScheduledTask -TaskName "Ruqyah-Daily-1400" -Confirm:$false -ErrorAction SilentlyContinue
-Remove-Item "$env:LOCALAPPDATA\Ruqyah" -Recurse -Force
+Remove-Item "$env:LOCALAPPDATA\Ruqyah" -Recurse -Force -ErrorAction SilentlyContinue
 ```
 
-**Jika menggunakan CMD:**
+### Windows — CMD
+
+Buka CMD:
 
 ```cmd
-powershell -NoProfile -Command "Unregister-ScheduledTask -TaskName 'Ruqyah-Logon' -Confirm:$false -ErrorAction SilentlyContinue; Unregister-ScheduledTask -TaskName 'Ruqyah-Daily-1400' -Confirm:$false -ErrorAction SilentlyContinue; Remove-Item (Join-Path $env:LOCALAPPDATA 'Ruqyah') -Recurse -Force"
+powershell -NoProfile -Command "Get-CimInstance Win32_Process -Filter \"name='powershell.exe'\" | Where-Object { $_.CommandLine -like '*Ruqyah\ruqyah.ps1*' } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force }; Unregister-ScheduledTask -TaskName 'Ruqyah-Logon' -Confirm:$false -ErrorAction SilentlyContinue; Unregister-ScheduledTask -TaskName 'Ruqyah-Daily-1400' -Confirm:$false -ErrorAction SilentlyContinue; Remove-Item (Join-Path $env:LOCALAPPDATA 'Ruqyah') -Recurse -Force -ErrorAction SilentlyContinue"
 ```
 
 ## Nota penting
