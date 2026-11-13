@@ -7,8 +7,8 @@ Pemain audio Ruqyah untuk **macOS dan Windows** menggunakan bacaan Syeikh Saad A
 - Main secara automatik apabila pengguna log masuk.
 - Main setiap hari pada jam 2:00 petang mengikut waktu tempatan komputer.
 - Memainkan audio ayat demi ayat.
-- Volume output ditetapkan pada 30% semasa setiap ayat dimainkan.
-- Volume asal dipulihkan selepas keseluruhan sesi tamat atau dihentikan.
+- Volume output ditetapkan pada 30% dan mute dinyahaktifkan semasa setiap ayat dimainkan.
+- Volume dan status mute asal dipulihkan selepas keseluruhan sesi tamat atau dihentikan.
 - Perubahan volume semasa playback dikesan dan dikembalikan kepada 30%.
 
 - MP3 dimuat turun sementara dan dipadam selepas dimainkan.
