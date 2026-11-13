@@ -3,7 +3,22 @@ set -u
 
 BASE_URL="https://everyayah.com/data/Ghamadi_40kbps"
 TMP_DIR="$(mktemp -d "${TMPDIR:-/tmp}/ruqyah.XXXXXX")"
-trap 'rm -rf "$TMP_DIR"' EXIT INT TERM
+ORIGINAL_VOLUME=""
+PLAYER_PID=""
+
+restore_volume() {
+  if [[ -n "$PLAYER_PID" ]] && kill -0 "$PLAYER_PID" 2>/dev/null; then
+    kill "$PLAYER_PID" 2>/dev/null || true
+    wait "$PLAYER_PID" 2>/dev/null || true
+  fi
+  if [[ "$ORIGINAL_VOLUME" =~ ^[0-9]+$ ]]; then
+    osascript -e "set volume output volume $ORIGINAL_VOLUME" >/dev/null 2>&1 || true
+  fi
+  rm -rf "$TMP_DIR"
+}
+trap restore_volume EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
 
 # Senarai ayat boleh diubah di sini.
 RANGES=(
@@ -25,7 +40,19 @@ RANGES=(
   "114:1-6"
 )
 
+if ! command -v osascript >/dev/null || ! command -v afplay >/dev/null; then
+  echo "Ralat: osascript atau afplay tidak ditemui."
+  exit 1
+fi
+
+ORIGINAL_VOLUME="$(osascript -e 'output volume of (get volume settings)' 2>/dev/null || true)"
+if [[ ! "$ORIGINAL_VOLUME" =~ ^[0-9]+$ ]]; then
+  echo "Ralat: tidak dapat membaca volume asal. Ruqyah dibatalkan."
+  exit 1
+fi
+
 echo "[$(date)] Ruqyah bermula."
+echo "Volume dikunci pada 30% sepanjang bacaan."
 
 for range in "${RANGES[@]}"; do
   surah="${range%%:*}"
@@ -41,7 +68,15 @@ for range in "${RANGES[@]}"; do
     echo "Memainkan $file"
     if curl --fail --location --silent --show-error --retry 2 --connect-timeout 20 "$url" -o "$audio"; then
       if [[ -s "$audio" ]]; then
-        afplay "$audio" || echo "Amaran: audio $file tidak dapat dimainkan."
+        osascript -e 'set volume output volume 30' >/dev/null
+        afplay "$audio" &
+        PLAYER_PID=$!
+        while kill -0 "$PLAYER_PID" 2>/dev/null; do
+          osascript -e 'set volume output volume 30' >/dev/null 2>&1 || true
+          sleep 0.2
+        done
+        wait "$PLAYER_PID" || echo "Amaran: audio $file tidak dapat dimainkan."
+        PLAYER_PID=""
       else
         echo "Amaran: audio kosong ($file)."
       fi
@@ -53,4 +88,4 @@ for range in "${RANGES[@]}"; do
   done
 done
 
-echo "[$(date)] Ruqyah selesai."
+echo "[$(date)] Ruqyah selesai. Volume asal akan dipulihkan."
