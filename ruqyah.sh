@@ -4,6 +4,7 @@ set -u
 BASE_URL="https://everyayah.com/data/Ghamadi_40kbps"
 TMP_DIR="$(mktemp -d "${TMPDIR:-/tmp}/ruqyah.XXXXXX")"
 ORIGINAL_VOLUME=""
+ORIGINAL_MUTED=""
 PLAYER_PID=""
 
 restore_volume() {
@@ -13,6 +14,9 @@ restore_volume() {
   fi
   if [[ "$ORIGINAL_VOLUME" =~ ^[0-9]+$ ]]; then
     osascript -e "set volume output volume $ORIGINAL_VOLUME" >/dev/null 2>&1 || true
+  fi
+  if [[ "$ORIGINAL_MUTED" == "true" || "$ORIGINAL_MUTED" == "false" ]]; then
+    osascript -e "set volume output muted $ORIGINAL_MUTED" >/dev/null 2>&1 || true
   fi
   rm -rf "$TMP_DIR"
 }
@@ -46,7 +50,8 @@ if ! command -v osascript >/dev/null || ! command -v afplay >/dev/null; then
 fi
 
 ORIGINAL_VOLUME="$(osascript -e 'output volume of (get volume settings)' 2>/dev/null || true)"
-if [[ ! "$ORIGINAL_VOLUME" =~ ^[0-9]+$ ]]; then
+ORIGINAL_MUTED="$(osascript -e 'output muted of (get volume settings)' 2>/dev/null || true)"
+if [[ ! "$ORIGINAL_VOLUME" =~ ^[0-9]+$ || ( "$ORIGINAL_MUTED" != "true" && "$ORIGINAL_MUTED" != "false" ) ]]; then
   echo "Ralat: tidak dapat membaca volume asal. Ruqyah dibatalkan."
   exit 1
 fi
@@ -68,7 +73,7 @@ for range in "${RANGES[@]}"; do
     echo "Memainkan $file"
     if curl --fail --location --silent --show-error --retry 2 --connect-timeout 20 "$url" -o "$audio"; then
       if [[ -s "$audio" ]]; then
-        osascript -e 'set volume output volume 30' >/dev/null
+        osascript -e 'set volume output volume 30 output muted false' >/dev/null
         afplay "$audio" &
         PLAYER_PID=$!
         while kill -0 "$PLAYER_PID" 2>/dev/null; do
