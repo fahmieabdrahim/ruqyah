@@ -6,6 +6,7 @@ $hasLock = $false
 $tempDir = Join-Path ([System.IO.Path]::GetTempPath()) ("Ruqyah-" + [guid]::NewGuid().ToString("N"))
 $player = $null
 $originalVolume = $null
+$originalMuted = $false
 $volumeCaptured = $false
 
 # Akses Windows Core Audio untuk mengawal volume output sistem.
@@ -77,6 +78,15 @@ public static class RuqyahAudioVolume {
         Guid context = Guid.Empty;
         Marshal.ThrowExceptionForHR(GetEndpoint().SetMasterVolumeLevelScalar(Math.Max(0f, Math.Min(1f, value)), ref context));
     }
+    public static bool GetMute() {
+        bool muted;
+        Marshal.ThrowExceptionForHR(GetEndpoint().GetMute(out muted));
+        return muted;
+    }
+    public static void SetMute(bool muted) {
+        Guid context = Guid.Empty;
+        Marshal.ThrowExceptionForHR(GetEndpoint().SetMute(muted, ref context));
+    }
 }
 
 [ComImport]
@@ -108,6 +118,7 @@ try {
   if (-not $hasLock) { Write-Output "Ruqyah sedang dimainkan; sesi baharu dibatalkan."; exit 0 }
 
   $originalVolume = [RuqyahAudioVolume]::Get()
+  $originalMuted = [RuqyahAudioVolume]::GetMute()
   $volumeCaptured = $true
 
   New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
@@ -135,10 +146,12 @@ try {
 
         $duration = $player.NaturalDuration.TimeSpan
         [RuqyahAudioVolume]::Set(0.30)
+        [RuqyahAudioVolume]::SetMute($false)
         $player.Play()
         $deadline = (Get-Date).Add($duration).AddSeconds(8)
         while ($player.Position -lt $duration -and (Get-Date) -lt $deadline) {
           [RuqyahAudioVolume]::Set(0.30)
+          [RuqyahAudioVolume]::SetMute($false)
           Start-Sleep -Milliseconds 200
         }
         $player.Stop()
@@ -157,7 +170,10 @@ try {
 finally {
   try { if ($player) { $player.Close() } } catch {}
   if ($volumeCaptured) {
-    try { [RuqyahAudioVolume]::Set($originalVolume) } catch { Write-Warning "Volume asal tidak dapat dipulihkan secara automatik." }
+    try {
+      [RuqyahAudioVolume]::Set($originalVolume)
+      [RuqyahAudioVolume]::SetMute($originalMuted)
+    } catch { Write-Warning "Tetapan volume asal tidak dapat dipulihkan secara automatik." }
   }
   Remove-Item $tempDir -Recurse -Force -ErrorAction SilentlyContinue
   if ($hasLock) { $mutex.ReleaseMutex() }
