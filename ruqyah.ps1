@@ -18,21 +18,21 @@ using System.Runtime.InteropServices;
 [Guid("A95664D2-9614-4F35-A746-DE8DB63617E6")]
 [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
 interface IMMDeviceEnumerator {
-    int EnumAudioEndpoints(int dataFlow, int stateMask, out IntPtr devices);
-    int GetDefaultAudioEndpoint(int dataFlow, int role, out IMMDevice device);
-    int GetDevice(string id, out IMMDevice device);
-    int RegisterEndpointNotificationCallback(IntPtr client);
-    int UnregisterEndpointNotificationCallback(IntPtr client);
+    [PreserveSig] int EnumAudioEndpoints(int dataFlow, int stateMask, out IntPtr devices);
+    [PreserveSig] int GetDefaultAudioEndpoint(int dataFlow, int role, out IMMDevice device);
+    [PreserveSig] int GetDevice(string id, out IMMDevice device);
+    [PreserveSig] int RegisterEndpointNotificationCallback(IntPtr client);
+    [PreserveSig] int UnregisterEndpointNotificationCallback(IntPtr client);
 }
 
 [ComImport]
 [Guid("D666063F-1587-4E43-81F1-B948E807363F")]
 [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
 interface IMMDevice {
-    int Activate(ref Guid iid, int clsctx, IntPtr activationParams, out IAudioEndpointVolume volume);
-    int OpenPropertyStore(int access, out IntPtr properties);
-    int GetId(out IntPtr id);
-    int GetState(out int state);
+    [PreserveSig] int Activate(ref Guid iid, int clsctx, IntPtr activationParams, out IAudioEndpointVolume volume);
+    [PreserveSig] int OpenPropertyStore(int access, out IntPtr properties);
+    [PreserveSig] int GetId(out IntPtr id);
+    [PreserveSig] int GetState(out int state);
 }
 
 [ComImport]
@@ -41,22 +41,22 @@ interface IMMDevice {
 interface IAudioEndpointVolume {
     int RegisterControlChangeNotify(IntPtr notify);
     int UnregisterControlChangeNotify(IntPtr notify);
-    int GetChannelCount(out uint count);
-    int SetMasterVolumeLevel(float level, ref Guid context);
-    int SetMasterVolumeLevelScalar(float level, ref Guid context);
-    int GetMasterVolumeLevel(out float level);
-    int GetMasterVolumeLevelScalar(out float level);
-    int SetChannelVolumeLevel(uint channel, float level, ref Guid context);
-    int SetChannelVolumeLevelScalar(uint channel, float level, ref Guid context);
-    int GetChannelVolumeLevel(uint channel, out float level);
-    int GetChannelVolumeLevelScalar(uint channel, out float level);
-    int SetMute([MarshalAs(UnmanagedType.Bool)] bool mute, ref Guid context);
-    int GetMute([MarshalAs(UnmanagedType.Bool)] out bool mute);
-    int GetVolumeStepInfo(out uint step, out uint stepCount);
-    int VolumeStepUp(ref Guid context);
-    int VolumeStepDown(ref Guid context);
-    int QueryHardwareSupport(out uint mask);
-    int GetVolumeRange(out float min, out float max, out float increment);
+    [PreserveSig] int GetChannelCount(out uint count);
+    [PreserveSig] int SetMasterVolumeLevel(float level, ref Guid context);
+    [PreserveSig] int SetMasterVolumeLevelScalar(float level, ref Guid context);
+    [PreserveSig] int GetMasterVolumeLevel(out float level);
+    [PreserveSig] int GetMasterVolumeLevelScalar(out float level);
+    [PreserveSig] int SetChannelVolumeLevel(uint channel, float level, ref Guid context);
+    [PreserveSig] int SetChannelVolumeLevelScalar(uint channel, float level, ref Guid context);
+    [PreserveSig] int GetChannelVolumeLevel(uint channel, out float level);
+    [PreserveSig] int GetChannelVolumeLevelScalar(uint channel, out float level);
+    [PreserveSig] int SetMute([MarshalAs(UnmanagedType.Bool)] bool mute, ref Guid context);
+    [PreserveSig] int GetMute([MarshalAs(UnmanagedType.Bool)] out bool mute);
+    [PreserveSig] int GetVolumeStepInfo(out uint step, out uint stepCount);
+    [PreserveSig] int VolumeStepUp(ref Guid context);
+    [PreserveSig] int VolumeStepDown(ref Guid context);
+    [PreserveSig] int QueryHardwareSupport(out uint mask);
+    [PreserveSig] int GetVolumeRange(out float min, out float max, out float increment);
 }
 
 public static class RuqyahAudioVolume {
